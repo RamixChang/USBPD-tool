@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>USB PD 工程師的工具箱</title>
+  <style>
+    /************************************************
+     * 1) 全域設定：排版 & 色彩
+     ************************************************/
+    :root {
+      --main-bg: #F9FAFB;          /* 頁面背景 */
+      --container-bg: #FFFFFF;     /* 容器背景 */
+      --primary-color: #007BFF;    /* 主色 (按鈕、表頭) */
+      --primary-color-hover: #0056B3; 
+      --border-color: #DDDDDD;
+      --text-color: #333333;
+      --secondary-bg: #F2F8FF;     /* 表格偶數行背景 */
+      --heading-font: "Microsoft JhengHei", Arial, sans-serif;
+      --body-font: "Microsoft JhengHei", Arial, sans-serif;
+    }
+
+    /* 全域重置 */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--main-bg);
+      font-family: var(--body-font);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    /************************************************
+     * 2) 容器：限制寬度 + 白底卡片感 + 陰影
+     ************************************************/
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: var(--container-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    /************************************************
+     * 3) 標題 & 分隔線
+     ************************************************/
+    h1, h2, h3 {
+      margin-bottom: 12px;
+      font-weight: 600;
+      font-family: var(--heading-font);
+    }
+
+    hr {
+      margin: 20px auto;
+      border: none;
+      height: 1px;
+      background-color: var(--border-color);
+      width: 60%;
+    }
+
+    p {
+      margin-bottom: 16px;
+      font-size: 1rem;
+    }
+
+    /************************************************
+     * 4) 表格樣式
+     ************************************************/
+    table {
+      width: 100%;
+      margin: 20px 0;
+      border-collapse: collapse;
+      border-radius: 6px;
+      overflow: hidden; /* 讓圓角有效 */
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    th {
+      background-color: var(--primary-color);
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--secondary-bg);
+    }
+
+    /************************************************
+     * 5) 按鈕 & 輸入框樣式
+     ************************************************/
+    button {
+      background-color: var(--primary-color);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      margin-top: 8px;
+      margin-left: 8px;
+    }
+    button:hover {
+      background-color: var(--primary-color-hover);
+    }
+
+    input[type="number"], input[type="text"] {
+      width: 100px;
+      padding: 6px;
+      margin: 5px;
+      border: 1px solid #CCCCCC;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      text-align: center;
+      transition: border-color 0.2s ease;
+    }
+    input[type="number"]:focus, input[type="text"]:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    label {
+      display: inline-block;
+      margin: 5px 0;
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- 網站標題 & 簡介 -->
+    <h1>歡迎來到 USB PD 工程師的線上工具箱</h1>
+    <p>PD EE 的日常簡易工具網站。</p>
+
+    <hr>
+
+    <!-- PD 計算器 -->
+    <h2>PD 計算器</h2>
+    <p>輸入電壓 (V) 和電流 (A)，計算功率 (W)：</p>
+    <label for="voltage">電壓 (V)：</label>
+    <input type="number" id="voltage" placeholder="輸入電壓">
+    <label for="current">電流 (A)：</label>
+    <input type="number" id="current" placeholder="輸入電流">
+    <button onclick="calculatePower()">計算功率</button>
+    <button onclick="clearPDCalc()">清除</button>
+    <h3>計算結果：</h3>
+    <p id="result">請輸入數值後按下計算</p>
+
+    <hr>
+
+    <!-- USB 速查表 -->
+    <h2>USB 規格速查表</h2>
+    <p>查看不同 USB 版本的官方版本名、傳輸速率與特色：</p>
+    <table>
+      <tr>
+        <th>官方版本名</th>
+        <th>官方市場代號</th>
+        <th>最高傳輸速率(bit)</th>
+        <th>最大供電功率</th>
+      </tr>
+      <tr>
+        <td>Low-Speed</td>
+        <td>Basic-Speed USB (USB 1.0)</td>
+        <td>1.5 Mbps</td>
+        <td>2.5W</td>
+      </tr>
+      <tr>
+        <td>Full-Speed</td>
+        <td>Basic-Speed USB (USB 1.1)</td>
+        <td>12 Mbps</td>
+        <td>2.5W</td>
+      </tr>
+      <tr>
+        <td>High-Speed</td>
+        <td>Hi-Speed USB (USB 2.0)</td>
+        <td>480 Mbps</td>
+        <td>2.5W</td>
+      </tr>
+      <tr>
+        <td>USB 3.2 Gen 1x1</td>
+        <td>SuperSpeed USB 5Gbps (USB 3.0)</td>
+        <td>5 Gbps</td>
+        <td>4.5W</td>
+      </tr>
+      <tr>
+        <td>USB 3.2 Gen 2x1</td>
+        <td>SuperSpeed USB 10Gbps (USB 3.1)</td>
+        <td>10 Gbps</td>
+        <td>15W</td>
+      </tr>
+      <tr>
+        <td>USB 3.2 Gen 2x2</td>
+        <td>SuperSpeed USB 20Gbps</td>
+        <td>20 Gbps</td>
+        <td>15W</td>
+      </tr>
+      <tr>
+        <td>USB4</td>
+        <td>USB4 40Gbps</td>
+        <td>40 Gbps</td>
+        <td>100W</td>
+      </tr>
+    </table>
+
+
+    <hr>
+
+    <!-- 單位轉換工具 -->
+    <h2>單位轉換工具</h2>
+    <p>在以下工具中，輸入已知數值，即可計算未知數值。</p>
+
+    <!-- (A) W ↔ V ↔ A 轉換 -->
+    <div id="unit-conversion-wva">
+      <h3>W ↔ V ↔ A 轉換</h3>
+      <p>請輸入「已知的兩個值」，第三個留空，系統自動計算：</p>
+      <label>W (瓦特): </label>
+      <input type="number" id="inputW" placeholder="瓦特">
+      <label>V (電壓): </label>
+      <input type="number" id="inputV" placeholder="電壓">
+      <label>A (電流): </label>
+      <input type="number" id="inputA" placeholder="電流">
+      <br>
+      <button onclick="convertWVA()">轉換</button>
+      <button onclick="clearWVA()">清除</button>
+      <p id="wvaResult"></p>
+    </div>
+
+    <hr>
+
+    <!-- (B) mm ↔ inch 轉換 -->
+    <div id="unit-conversion-mm-inch">
+      <h3>mm ↔ inch 轉換</h3>
+      <p>請輸入「mm 或 inch」其中一個，另一個留空，系統自動計算：</p>
+      <label>mm: </label>
+      <input type="number" id="inputMM" placeholder="mm">
+      <label>inch: </label>
+      <input type="number" id="inputIN" placeholder="inch">
+      <br>
+      <button onclick="convertMMIN()">轉換</button>
+      <button onclick="clearMMIN()">清除</button>
+      <p id="mmInchResult"></p>
+    </div>
+
+    <hr>
+
+    <!-- (C) 示波器參數三向轉換 -->
+    <div id="unit-conversion-scope-triple">
+      <h3>Sample Rate ↔ Bit Depth ↔ Data Rate 轉換</h3>
+      <p>請輸入「已知的兩個數值」，留空一個，系統自動計算：</p>
+      <label for="inputSampleRateTriple">Sample Rate (GSa/s): </label>
+      <input type="number" id="inputSampleRateTriple" placeholder="例如 1">
+      <label for="inputBitDepthTriple">Bit Depth (bits): </label>
+      <input type="number" id="inputBitDepthTriple" placeholder="例如 8">
+      <label for="inputDataRateTriple">Data Rate (Gbp/s): </label>
+      <input type="number" id="inputDataRateTriple" placeholder="例如 80">
+      <br>
+      <button onclick="convertScopeTriple()">轉換</button>
+      <button onclick="clearScopeTriple()">清除</button>
+      <p id="scopeResultTriple"></p>
+    </div>
+
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    /************************************************
+     * 1) PD 計算器
+     ************************************************/
+    function calculatePower() {
+      let voltage = document.getElementById("voltage").value;
+      let current = document.getElementById("current").value;
+      if (voltage === "" || current === "") {
+        document.getElementById("result").innerText = "請輸入有效的數值";
+        return;
+      }
+      let power = voltage * current;
+      document.getElementById("result").innerText = "計算結果：" + power + " W";
+    }
+    function clearPDCalc() {
+      document.getElementById("voltage").value = "";
+      document.getElementById("current").value = "";
+      document.getElementById("result").innerText = "";
+    }
+
+    /************************************************
+     * 2) W ↔ V ↔ A 轉換
+     ************************************************/
+    function convertWVA() {
+      let w = parseFloat(document.getElementById("inputW").value);
+      let v = parseFloat(document.getElementById("inputV").value);
+      let a = parseFloat(document.getElementById("inputA").value);
+      let filled = 0;
+      if (!isNaN(w)) filled++;
+      if (!isNaN(v)) filled++;
+      if (!isNaN(a)) filled++;
+      if (filled < 2) {
+        document.getElementById("wvaResult").innerText = "請至少輸入兩個數值";
+        return;
+      }
+      if (filled === 3) {
+        document.getElementById("wvaResult").innerText = "請只輸入兩個數值，第三個留空";
+        return;
+      }
+      if (!isNaN(w) && !isNaN(v) && isNaN(a)) {
+        let resultA = w / v;
+        document.getElementById("inputA").value = resultA.toFixed(2);
+        document.getElementById("wvaResult").innerText = `A = ${resultA.toFixed(2)}`;
+      }
+      else if (!isNaN(w) && !isNaN(a) && isNaN(v)) {
+        let resultV = w / a;
+        document.getElementById("inputV").value = resultV.toFixed(2);
+        document.getElementById("wvaResult").innerText = `V = ${resultV.toFixed(2)}`;
+      }
+      else if (!isNaN(v) && !isNaN(a) && isNaN(w)) {
+        let resultW = v * a;
+        document.getElementById("inputW").value = resultW.toFixed(2);
+        document.getElementById("wvaResult").innerText = `W = ${resultW.toFixed(2)}`;
+      }
+    }
+    function clearWVA() {
+      document.getElementById("inputW").value = "";
+      document.getElementById("inputV").value = "";
+      document.getElementById("inputA").value = "";
+      document.getElementById("wvaResult").innerText = "";
+    }
+
+    /************************************************
+     * 3) mm ↔ inch 轉換
+     ************************************************/
+    function convertMMIN() {
+      let mm = parseFloat(document.getElementById("inputMM").value);
+      let inch = parseFloat(document.getElementById("inputIN").value);
+      if (!isNaN(mm) && isNaN(inch)) {
+        let resultIN = mm / 25.4;
+        document.getElementById("inputIN").value = resultIN.toFixed(4);
+        document.getElementById("mmInchResult").innerText = `${mm} mm = ${resultIN.toFixed(4)} inch`;
+      } 
+      else if (!isNaN(inch) && isNaN(mm)) {
+        let resultMM = inch * 25.4;
+        document.getElementById("inputMM").value = resultMM.toFixed(2);
+        document.getElementById("mmInchResult").innerText = `${inch} inch = ${resultMM.toFixed(2)} mm`;
+      } 
+      else {
+        document.getElementById("mmInchResult").innerText = "請只輸入 mm 或 inch 的其中一個數值";
+      }
+    }
+    function clearMMIN() {
+      document.getElementById("inputMM").value = "";
+      document.getElementById("inputIN").value = "";
+      document.getElementById("mmInchResult").innerText = "";
+    }
+
+    /************************************************
+     * 4) 示波器參數三向轉換 (GSa/s, Gbp/s)
+     ************************************************/
+    function convertScopeTriple() {
+      let s = parseFloat(document.getElementById("inputSampleRateTriple").value);  // Sample Rate (GSa/s)
+      let b = parseFloat(document.getElementById("inputBitDepthTriple").value);    // Bit Depth (bits)
+      let d = parseFloat(document.getElementById("inputDataRateTriple").value);      // Data Rate (Gbp/s)
+      let filled = 0;
+      if (!isNaN(s)) filled++;
+      if (!isNaN(b)) filled++;
+      if (!isNaN(d)) filled++;
+      if (filled < 2) {
+        document.getElementById("scopeResultTriple").innerText = "請至少輸入兩個數值";
+        return;
+      }
+      if (filled === 3) {
+        document.getElementById("scopeResultTriple").innerText = "請只輸入兩個數值，第三個留空";
+        return;
+      }
+      if (!isNaN(s) && !isNaN(b) && isNaN(d)) {
+        let calculatedD = s * b;
+        document.getElementById("inputDataRateTriple").value = calculatedD.toFixed(2);
+        document.getElementById("scopeResultTriple").innerText = `Data Rate = ${calculatedD.toFixed(2)} Gbp/s`;
+      }
+      else if (!isNaN(s) && !isNaN(d) && isNaN(b)) {
+        let calculatedB = d / s;
+        document.getElementById("inputBitDepthTriple").value = calculatedB.toFixed(2);
+        document.getElementById("scopeResultTriple").innerText = `Bit Depth = ${calculatedB.toFixed(2)} bits`;
+      }
+      else if (!isNaN(b) && !isNaN(d) && isNaN(s)) {
+        let calculatedS = d / b;
+        document.getElementById("inputSampleRateTriple").value = calculatedS.toFixed(2);
+        document.getElementById("scopeResultTriple").innerText = `Sample Rate = ${calculatedS.toFixed(2)} GSa/s`;
+      }
+    }
+    function clearScopeTriple() {
+      document.getElementById("inputSampleRateTriple").value = "";
+      document.getElementById("inputBitDepthTriple").value = "";
+      document.getElementById("inputDataRateTriple").value = "";
+      document.getElementById("scopeResultTriple").innerText = "";
+    }
+  </script>
+</body>
+</html>
